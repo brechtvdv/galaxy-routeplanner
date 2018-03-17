@@ -17,11 +17,11 @@
 <h1 id="titel" style="z-index:10000000; background-color:#333; position: absolute;left: 0;right: 0;top: 0;margin: 0;text-align: center;padding: 20px;color: white; font-family:'Open Sans', sans-serif">Galaxy routeplanner</h1>    <div id="map"></div>
     <script>
                   var startIcon = L.icon({
-                  iconUrl : 'images/marker-icon-start.png'
+                  iconUrl : 'images/rocket.png'
                 });
 
                 var endIcon = L.icon({
-                  iconUrl : 'images/marker-icon-end.png'
+                  iconUrl : 'images/eind_punt.png'
             });
 
                     var start_star = "";
@@ -73,7 +73,9 @@
       var graph_map = {};
       for (var i = 0; i < stars.length; i++) {
         // if (stars[i].navstar == 1) {
-            var marker = L.marker([stars[i].longitude, stars[i].latitude]).bindPopup("Hello, this is <b>" + stars[i].names[0] + "</b>! Magnitude: " + stars[i].magnitude).addTo(map);
+            var marker = L.marker([stars[i].longitude, stars[i].latitude]).bindPopup("Hello, this is <b>" + stars[i].names[0] + "</b>! Magnitude: " + stars[i].magnitude).setIcon(L.icon({
+                  iconUrl : 'images/20px.png'
+            })).addTo(map);
             marker.data = stars[i];
             marker.data.id = i;
 
