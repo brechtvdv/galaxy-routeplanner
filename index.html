@@ -1,44 +1,109 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>WebGL</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      html, body, #map {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-      }
-    </style>
-
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+  <head>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
-
-    <!-- Mapbox GL -->
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.css" rel='stylesheet' />
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.js"></script>
+    <script src="https://cdn.klokantech.com/mapbox-gl-js/v0.43.0/mapbox-gl.js"></script>
     <script src="https://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
+    <script src="Stars_around_ghent.json"></script>
+    <script src="dijkstra.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.klokantech.com/mapbox-gl-js/v0.43.0/mapbox-gl.css" />
+    <style>
+      #map {position: absolute; top: 0; right: 0; bottom: 0; left: 0;}
+    </style>
+  </head>
+  <body>
+<h1 style="z-index:10000000; background-color:white; position: absolute;left: 0;right: 0;top: 0;margin: 0;text-align: center;padding: 20px;color: black; font-family:'Open Sans', sans-serif">Galaxy routeplanner</h1>    <div id="map"></div>
+    <script>
+                  var startIcon = L.icon({
+                  iconUrl : 'images/marker-icon-start.png'
+                });
 
-</head>
+                var endIcon = L.icon({
+                  iconUrl : 'images/marker-icon-end.png'
+            });
 
-<body>
-<div id="map"></div>
+                    var start_star = "";
+        var end_star = "";
+        var handleClick = function (marker) {
+            console.log(marker.data.id);
+            if (start_star === "") {
+                marker.setIcon(startIcon);
+                start_star = marker.data.id;
+                return start_star;
+              } else if (end_star === "") {
+                end_star = marker.data.id;
+            marker.setIcon(endIcon);
 
-<script>
-var map = L.map('map').setView([38.912753, -77.032194], 15);
+                // start routeplanning
+                console.log(graph.findShortestPath(start_star, end_star));
 
-L.marker([38.912753, -77.032194])
-    .bindPopup("Hello <b>Leaflet GL</b>!<br>Whoa, it works!")
-    .addTo(map)
-    .openPopup();
+            }
+        };
 
-var gl = L.mapboxGL({
-    accessToken: 'no-token',
-    style: './dark-matter.json'
-}).addTo(map);
 
-</script>
-</body>
+        function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+          var R = 6371; // Radius of the earth in km
+          var dLat = deg2rad(lat2-lat1);  // deg2rad below
+          var dLon = deg2rad(lon2-lon1); 
+          var a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2)
+            ; 
+          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+          var d = R * c; // Distance in km
+
+          return d;
+        }
+
+        function deg2rad(deg) {
+          return deg * (Math.PI/180)
+        }
+
+      var map = L.map('map').setView([51.0563145, 3.7212028], 13);
+      var gl = L.mapboxGL({
+        accessToken: 'not-needed',
+        style: 'https://free.tilehosting.com/styles/darkmatter/style.json?key=PZKFgitVD5TgsmXV5bEf'
+      }).addTo(map);
+
+      var graph_map = {};
+      for (var i = 0; i < stars.length; i++) {
+        // if (stars[i].navstar == 1) {
+            var marker = L.marker([stars[i].longitude, stars[i].latitude]).bindPopup("Hello, this is <b>" + stars[i].names[0] + "</b>! Magnitude: " + stars[i].magnitude).addTo(map);
+            marker.data = stars[i];
+            marker.data.id = i;
+
+           marker.on("click", function () {
+                handleClick(this);
+
+            })
+
+            graph_map[i] = {};
+            // Calculate distance to every other star
+            for (var j = 0; j < stars.length; j++) {
+                if (i != j) {
+                    var distance = getDistanceFromLatLonInKm(stars[i].latitude, stars[i].longitude, stars[j].latitude, stars[j].longitude);
+                      if (stars[i].navstar == 0 || stars[j].navstar == 0) {
+                        // distance = 1000000;
+                    }
+
+                    // console.log("Distance : " + distance);
+                    if (distance > 0.25){
+                        distance = 1000000;
+                    }
+                    graph_map[i][j] = distance;
+                }
+            }
+      }
+
+      graph = new Graph(graph_map);
+
+
+
+
+        
+    </script>
+  </body>
 </html>
