@@ -14,7 +14,7 @@
     </style>
   </head>
   <body>
-<h1 style="z-index:10000000; background-color:white; position: absolute;left: 0;right: 0;top: 0;margin: 0;text-align: center;padding: 20px;color: black; font-family:'Open Sans', sans-serif">Galaxy routeplanner</h1>    <div id="map"></div>
+<h1 id="titel" style="z-index:10000000; background-color:#333; position: absolute;left: 0;right: 0;top: 0;margin: 0;text-align: center;padding: 20px;color: white; font-family:'Open Sans', sans-serif">Galaxy routeplanner</h1>    <div id="map"></div>
     <script>
                   var startIcon = L.icon({
                   iconUrl : 'images/marker-icon-start.png'
@@ -30,14 +30,16 @@
             console.log(marker.data.id);
             if (start_star === "") {
                 marker.setIcon(startIcon);
-                start_star = marker.data.id;
+                start_star = marker.data;
                 return start_star;
               } else if (end_star === "") {
-                end_star = marker.data.id;
+                end_star = marker.data;
             marker.setIcon(endIcon);
 
                 // start routeplanning
                 console.log(graph.findShortestPath(start_star, end_star));
+
+                document.getElementById("titel").innerHTML = "Uw route: van ster " + start_star.names[0] + " naar ster " + end_star.names[0];
 
             }
         };
